@@ -1,0 +1,87 @@
+This is the Radscript preferences file. 
+Remark >> ri: + theRad.RadPath - The Radiance programs install path
+ri:F:\Radiance\
+Remark >> pp:  theRad.ProjectPath - The project path
+pp:F:\AProjectsRadiance\
+Remark >> vs:  theRad.VScnPath - The variable scenes path within the project
+vs:.\scene\
+Remark >> bs: theRad.BScnPath - The base scenes path within the project
+bs:.\scene\
+Remark >> mp: + theRad.MatPath - The materials path within the project
+mp:.\material\
+Remark >> rp: + theRad.RenderOptsPath - The render options path within the project
+rp:.\optfile\
+Remark >> ro: + theRad.RenderOptsFileName - The render options file name within the project
+ro:options_amb.txt
+Remark >> mk: + theRad.MkillumOptsFileName - The mkillum options file name within the project
+mk:options_low.txt
+Remark >> ov: + theRad.OvertureOptsFileName - The overture options file name within the project
+ov:options_overture.txt
+Remark >> ir: + theRad.IrradPath - The irradiance path within the project
+ir:.\images\irradiance\
+Remark >> im: + theRad.ImagePath - The images path within the project
+im:.\images\
+Remark >> ci: + theRad.PcombimagesourcePath - The pcomb images source path within the project
+ci:.\images\
+Remark >> ct: + theRad.PcombimagetargetPath - The pcomb images target path within the project
+ct:.\images\
+Remark >> ff: + theRad.RatiffimagePath - The ra_tiff images results path within the project
+ff:.\images\tiffs\
+Remark >> fi: + theRad.FinalimagePath - The final images results path within the project
+fi:.\images\tiffs\
+Remark >> ap: + theRad.AmbPath - The amb path within the project
+ap:.\ambfile\
+Remark >> i_: + theRad.ImgX - The image x and y pixel size.
+ix:400
+iy:400
+Remark >> o_: + theRad.OvImgX - The overture image x and y pixel size.
+ox:50
+oy:50
+Remark >> ip: + theRad.IllumPath - The illum path within the project
+ip:.\illums\
+Remark >> if: + theRad.IllumFileName - The illum file name
+if:illums_out.rad
+Remark >> op: + theRad.OctPath - The oct path within the project
+op:.\octree\
+Remark >> sh: + theRad.SHour - simulation hour start
+sh:8
+Remark >> eh: + theRad.EHour - simulation hour end
+eh:12
+Remark >> hi: + theRad.HrInc - simulation hour increment
+hi:0.5
+Remark >> ms: + theRad.MStart - simulation start month
+ms:8
+Remark >> me: + theRad.MEnd - simulation last month
+me:12
+Remark >> mi: + theRad.MInc - simulation month increment
+mi:3
+Remark >> pi: + theRad.IncRpictI - flag to include rpicti line
+pi:True
+Remark >> bf: + theRad.BatchFileName - rad script batch file name, will be written at project path
+bf:vba_batch.bat
+Remark >> bp: + theRad.PcombBatchFileName - pcomb batch file name 
+bp:
+Remark >> ed: + theRad.EditorPath - code editor application
+ed:
+Remark >> sd: + theRad.SimDay - day of the month for simulations
+sd:21
+Remark >> nt: + theRad.NightTime - flag to be night time
+nt:False
+Remark >> sr: + theRad.SetRadEnv - flag indicates to set Path and RAYPATH in the batch file
+sr:False
+Remark >> uo: + theRad.UseOverture - flag to use overtures
+uo:True
+Remark >> hv: + theRad.Hdrviewer - The application for viewing HDR image files
+hv:
+Remark >> p0: + theRad.Pcombpause - flag pauses each pcomb process for observation
+p0:False
+Remark >> rx: + rgl - regex filters for filtering the source file selections list at pcomb
+Remark >> s#: + # - The pcomb scales arguments
+s0:1
+s1:1
+s2:1
+s3:1
+s4:1
+s5:1
+s6:1
+s7:1

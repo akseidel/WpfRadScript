@@ -1,0 +1,1176 @@
+﻿<Window x:Name="Wnd_RadScript" x:Class="WpfRadScript.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="RadScript"
+        Width="1600"
+        MinWidth="980"
+        MaxWidth="2000"
+        MaxHeight="900"
+        SizeToContent="WidthAndHeight"
+        WindowStyle="None"
+        Background="Transparent"
+        AllowsTransparency="True"
+        BorderThickness="0"
+        MouseDown="DragWindow"
+        Closing="Window_Closing"
+        FontSize="14" 
+        Loaded="Window_Loaded"
+        Activated="Window_Activated"
+        >
+
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <Style x:Key="{x:Type ToolTip}"
+             TargetType="{x:Type ToolTip}">
+            <Setter Property="Background"
+                    Value="Transparent" />
+            <Setter Property="BorderThickness"
+                    Value="0"/>
+        </Style>
+        <BitmapImage x:Key="ReloadImage" UriSource="reload-icon.png" />
+        <ContextMenu x:Key="cmMagickResultsListImageItem" StaysOpen="True">
+            <MenuItem Header="Rename" Click="MagickResultsMenuItemRename_Click"  />
+            <MenuItem Header="Delete" Click="MagickResultsMenuItemDelete_Click" />
+        </ContextMenu>
+        <ContextMenu x:Key="cmRaTiffResultsListImageItem" StaysOpen="True">
+        <MenuItem Header="Rename" Click="RaTiffResultsMenuItemRename_Click"  />
+        <MenuItem Header="Delete" Click="RaTiffResultsMenuItemDelete_Click" />
+        </ContextMenu>
+        <BitmapImage x:Key="Grears1Image" UriSource="3-gears-hi-s.png" />
+    </Window.Resources>
+
+    <Border x:Name ="Body" 
+            Background="AliceBlue"
+            CornerRadius="24"
+            BorderThickness="3"
+            BorderBrush="DarkGray" 
+            >
+        <StackPanel Orientation="Vertical" Margin="10">
+            <DockPanel  HorizontalAlignment="Stretch" VerticalAlignment="Stretch"  Height="Auto" >
+                <Border CornerRadius="8" BorderThickness="1" BorderBrush="DarkGray" Padding="8" MinWidth="430">
+                    <TextBlock x:Name="statMsg" DockPanel.Dock="Left" TextWrapping="Wrap" 
+                               Text="{Binding StatusMsg, Mode=OneWay}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="4,0,0,0"></TextBlock>
+                </Border>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="10,10,0,10" >
+                    <StackPanel Orientation="Vertical">
+                        <Image x:Name="bt_regen"  Width="40" Height="40" Source ="{StaticResource ReloadImage}"  MouseUp="Bt_regen_MouseUp" Margin="0,0,20,0"  />
+                    </StackPanel>
+                    <Button Content="Write BatchFile" x:Name="bt_WriteBatchFile" Padding="4"  Margin="4,0" Click="WriteBatchFile_Click" Height="30"/>
+                    <Button Content="Append To BatchFile" x:Name="AppendBatchFile" Padding="4"  Margin="4,0" Click="AppendBatchFile_Click" Height="30"></Button>
+                    <Button Content="Explorer" x:Name="Explorer" Padding="4" Margin="4,0" MinWidth="80" Click="Explorer_Click" Height="30"></Button>
+                    <Button Content="Quit" x:Name="Quit" Padding="4" Margin="4,0,10,0" Click="Button_Click" MinWidth="80" Height="30"></Button>
+                </StackPanel>
+            </DockPanel>
+            <StackPanel Orientation="Vertical" VerticalAlignment="Stretch" Margin="6">
+                <Grid >
+                    <TabControl x:Name="MainTabControl" UseLayoutRounding="False" BorderThickness="0" FontSize="14" SelectionChanged="MainTabControl_SelectionChanged" >
+
+                        <TabItem x:Name="tabitem_General" Header="General" IsSelected="True">
+                            <StackPanel Orientation="Vertical" >
+                                <GroupBox Header="Radiance" >
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition/>
+                                            <RowDefinition/>
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="80*"/>
+                                            <ColumnDefinition Width="100*"/>
+                                            <ColumnDefinition Width="180*" />
+                                            <ColumnDefinition Width="220" />
+                                            <ColumnDefinition Width="115*"  />
+                                            <ColumnDefinition Width="116*"/>
+                                            <ColumnDefinition Width="115*"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <Label x:Name="lb_projectpath"  Grid.Row="0" Grid.Column="1" 
+                                               Content="Project:" HorizontalContentAlignment="Right" Foreground="Black" VerticalContentAlignment="Center"/>
+                                        <TextBox x:Name="tboxProjectPath" Grid.Row="0"  Grid.Column="2" Grid.ColumnSpan="3"
+                                                 VerticalContentAlignment="Center" VerticalAlignment="Center"
+                                                 Text="{Binding ProjectPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                 MouseDoubleClick="TboxProjectPath_MouseDoubleClick"  
+                                                 LostFocus="FolderTboxEndsInBackSlash" 
+                                                 TextChanged="TboxProjectPath_TextChanged" Margin="0">
+                                        </TextBox>
+                                        <Button x:Name="MakeRadPaths"   Grid.Row="0" Grid.Column="5" 
+                                                Content="Make Rad Paths" Margin="10,2,0,2" Click="MakeRadPaths_Click" Padding="4" Height="30" />
+                                        <Label x:Name="lb_radiance" Content="?radiance"
+                                               Grid.Row="0" Grid.Column="0"
+                                               Margin="0,2,0,0" FontWeight="Bold" MouseDoubleClick="Lb_radiance_MouseDoubleClick" />
+                                        <Label x:Name="lb_batchfile"
+                                               Grid.Row="1" Grid.Column="1"
+                                               Content="Batchfile:" HorizontalContentAlignment="Right"
+                                               HorizontalAlignment="Right" VerticalContentAlignment="Center" Margin="0"/>
+                                        <TextBox Grid.Row="1" Grid.Column="2" x:Name="tboxBatchFileName" Text ="{Binding Path=BatchFileName, Mode=TwoWay}" VerticalContentAlignment="Center" VerticalAlignment="Center" Padding="4,0" TextChanged="TboxBatchFileName_TextChanged" >
+
+                                        </TextBox>
+                                        <TextBox Grid.Row="1" Grid.Column="3" x:Name="tboxRadInstallPath" VerticalContentAlignment="Center" VerticalAlignment="Center" Margin="10,0,0,0" Text="{Binding RadPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MouseDoubleClick="TboxRadInstallPath_MouseDoubleClick" TextChanged="TboxRadInstallPath_TextChanged" Padding="4,0" LostFocus="FolderTboxEndsInBackSlash" />
+                                        <CheckBox Grid.Row="1" Grid.Column="4" Content="Set Rad. Env." VerticalContentAlignment="Center" VerticalAlignment="Center" Margin="6,0,0,0" IsChecked="{Binding SetRadEnv, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                        <Button x:Name="btn_ShellBatch" Grid.Row="1" Grid.Column="5" Content="Shell BatchFile" Margin="10,2,0,0" Padding="4" Click="Button_ShellBatch_Click" Height="30"/>
+                                        <Button x:Name="but_viewradbatch" Grid.Row="1" Grid.Column="6" Content="View BatchFile" Margin="5,2,0,0" Padding="4" Click="Button_Click_1" Height="30" />
+                                    </Grid>
+
+                                </GroupBox>
+
+                                <Expander Header="Sky and Time Batching" >
+                                    <GroupBox  >
+                                        <DockPanel
+                                        HorizontalAlignment="Stretch" 
+                                        VerticalAlignment="Stretch" 
+                                        Height="Auto" 
+                                        >
+                                            <GroupBox Header="Settings" Margin="4" DockPanel.Dock="Left">
+                                                <Grid Margin="0,6,0,0" >
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="1*" />
+                                                        <ColumnDefinition Width="2*" MinWidth="80" />
+                                                        <ColumnDefinition Width="1*" />
+                                                        <ColumnDefinition Width="2*" MinWidth="80" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="1*" />
+                                                        <RowDefinition Height="1*" />
+                                                        <RowDefinition Height="1*" />
+                                                    </Grid.RowDefinitions>
+
+                                                    <Label x:Name="lb_skypath" Content="Skyfile Path:" HorizontalContentAlignment="Right"/>
+                                                    <TextBox Grid.Column="1" x:Name="tboxskyfilepath" VerticalContentAlignment="Center" VerticalAlignment="Center" HorizontalContentAlignment="Center" Text="{Binding SkyFilePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  KeyUp="Tboxskyfilepath_KeyUp" MouseDoubleClick="Tboxskyfilepath_MouseDoubleClick" TextChanged="Tboxskyfilepath_TextChanged" Padding="4,0" LostFocus="FolderTboxEndsInBackSlash"/>
+                                                    <Label x:Name="lb_illumpath" Grid.Column="2" Content="Illum Path:" Margin="10,0,0,0" HorizontalContentAlignment="Right"/>
+                                                    <TextBox Grid.Column="3" x:Name="tboxillumpath" VerticalContentAlignment="Center" VerticalAlignment="Center" HorizontalContentAlignment="Center" Text="{Binding IllumPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  KeyUp="Tboxillumpath_KeyUp" MouseDoubleClick="Tboxillumpath_MouseDoubleClick" TextChanged="Tboxillumpath_TextChanged" Padding="4,0" LostFocus="FolderTboxEndsInBackSlash"/>
+                                                    <Label x:Name="lb_skyfile" Grid.Row="1" Content="Skyfile:" HorizontalContentAlignment="Right"/>
+                                                    <TextBox Grid.Column="1" Grid.Row="1" x:Name="tboxskyfile" VerticalContentAlignment="Center" VerticalAlignment="Center" HorizontalContentAlignment="Center" Text="{Binding SkyFileName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" KeyUp="Tboxskyfile_KeyUp" TextChanged="Tboxskyfile_TextChanged" Padding="4,0"/>
+                                                    <Label x:Name="lb_illumfile" Grid.Row="1" Grid.Column="2" Content="Illumfile:" Margin="10,0,0,0" VerticalAlignment="Center" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                                                    <TextBox  Grid.Row="1" Grid.Column="3" x:Name="tboxillumfile" VerticalContentAlignment="Center" VerticalAlignment="Center" HorizontalContentAlignment="Center" Text="{Binding IllumFileName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  KeyUp="Tboxillumfile_KeyUp" TextChanged="Tboxillumfile_TextChanged" Padding="4,0"/>
+                                                    <Label Grid.Row="2" Content="Sky Switch:" HorizontalContentAlignment="Right"/>
+                                                    <TextBox  Grid.Row="2" Grid.Column="1" x:Name="tboxskyswitch" VerticalContentAlignment="Center" VerticalAlignment="Center" HorizontalContentAlignment="Center" Text="{Binding SkySwitch, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" KeyUp="Tboxskyswitch_KeyUp"/>
+                                                </Grid>
+                                            </GroupBox>
+                                            <GroupBox Header="Hour Of Day  #Passes/Day" DockPanel.Dock="Left" Margin="4" MaxWidth="300">
+                                                <Grid Margin="0,6,0,0">
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition/>
+                                                        <RowDefinition/>
+                                                        <RowDefinition/>
+                                                    </Grid.RowDefinitions>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition/>
+                                                        <ColumnDefinition MinWidth="30"/>
+                                                        <ColumnDefinition/>
+                                                        <ColumnDefinition MinWidth="30"/>
+                                                        <ColumnDefinition/>
+                                                        <ColumnDefinition MinWidth="40"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <Label x:Name="lb_startHr" Content="Start:" HorizontalContentAlignment="Right"/>
+                                                    <TextBox Grid.Column="1" x:Name="tbox_startH" VerticalContentAlignment="Center" VerticalAlignment="Center" HorizontalContentAlignment="Center" Text="{Binding SHour, Mode=TwoWay}" KeyUp="Tbox_startH_KeyUp"/>
+                                                    <Label x:Name="lb_endH" Grid.Column="2" Content="End:" Margin="4,0,0,0" HorizontalContentAlignment="Right"/>
+                                                    <TextBox Grid.Column="3" x:Name="tbox_endH" VerticalContentAlignment="Center" VerticalAlignment="Center" HorizontalContentAlignment="Center" Text="{Binding EHour, Mode=TwoWay}" KeyUp="Tbox_endH_KeyUp"/>
+                                                    <Label x:Name="lb_intervalH" Grid.Column="4" Content="Interval:" Margin="4,0,0,0" HorizontalContentAlignment="Right"/>
+                                                    <TextBox Grid.Column="5" x:Name="tbox_intervalH" VerticalContentAlignment="Center" VerticalAlignment="Center" HorizontalContentAlignment="Center" Text="{Binding HrInc, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True}" KeyUp="Tbox_intervalH_KeyUp"/>
+                                                    <CheckBox x:Name="chk_NightTime" Grid.Row="1" Content="Night Time" VerticalContentAlignment="Center" VerticalAlignment="Center" Margin="6,0,0,0" Grid.ColumnSpan="3" IsChecked="{Binding NightTime, Mode=TwoWay}" Click="CheckBox_NightTime_Click"/>
+                                                    <ScrollBar Grid.Row="1" Grid.Column="5" x:Name="scrollHr" Orientation="Horizontal" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" VerticalAlignment="Center" Height="20" SmallChange="{Binding HrInc, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True}" Scroll="ScrollHr_Scroll" Maximum="{Binding EHour, Mode=TwoWay}" Minimum="{Binding SHour, Mode=TwoWay}"/>
+                                                </Grid>
+                                            </GroupBox>
+                                            <GroupBox Header="Simulation Months # Month Passes" DockPanel.Dock="Left" Margin="4" HorizontalAlignment="Left" MaxWidth="300">
+                                                <Grid Margin="0,6,0,0"  >
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition/>
+                                                        <RowDefinition/>
+                                                        <RowDefinition/>
+                                                    </Grid.RowDefinitions>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition/>
+                                                        <ColumnDefinition MinWidth="30"/>
+                                                        <ColumnDefinition/>
+                                                        <ColumnDefinition MinWidth="30"/>
+                                                        <ColumnDefinition/>
+                                                        <ColumnDefinition MinWidth="40"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <Label x:Name="lb_startM" Content="Start:" HorizontalContentAlignment="Right"/>
+                                                    <TextBox Grid.Column="1" x:Name="tbox_startM" VerticalContentAlignment="Center" VerticalAlignment="Center" HorizontalContentAlignment="Center" Text="{Binding MStart, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" KeyUp="Tbox_startM_KeyUp"/>
+                                                    <Label x:Name="lb_endM" Grid.Column="2" Content="End:" Margin="4,0,0,0" HorizontalContentAlignment="Right"/>
+                                                    <TextBox Grid.Column="3" x:Name="tbox_endM" VerticalContentAlignment="Center" VerticalAlignment="Center" HorizontalContentAlignment="Center" Text="{Binding MEnd, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" KeyUp="Tbox_endM_KeyUp"/>
+                                                    <Label x:Name="lb_intervalM" Grid.Column="4" Content="Interval:" Margin="4,0,0,0" HorizontalContentAlignment="Right"/>
+                                                    <TextBox Grid.Column="5" x:Name="tbox_intervalM" VerticalContentAlignment="Center" VerticalAlignment="Center" HorizontalContentAlignment="Center" Text="{Binding MInc, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                                    <Label x:Name="lb_simdayM" Grid.Row="1" Content="Simulation Day:" VerticalContentAlignment="Center" VerticalAlignment="Center" Margin="2,0,0,0" Grid.ColumnSpan="3" HorizontalContentAlignment="Right"/>
+                                                    <TextBox  Grid.Row="1" Grid.Column="3" x:Name="tbox_simdayM" VerticalContentAlignment="Center" VerticalAlignment="Center" HorizontalContentAlignment="Center" Text="{Binding SimDay, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" KeyUp="Tbox_simdayM_KeyUp"/>
+                                                    <ScrollBar Grid.Row="1" Grid.Column="5" x:Name="scrollMnth" Orientation="Horizontal" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" VerticalAlignment="Center" Height="20" SmallChange="{Binding MInc, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Scroll="ScrollMnth_Scroll" Maximum="{Binding MEnd, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True}" Minimum="{Binding MStart, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True}"/>
+                                                </Grid>
+                                            </GroupBox>
+                                        </DockPanel>
+                                    </GroupBox>
+                                </Expander>
+
+                                <GroupBox Header="Command Lines Preview (Each time interval simulation has a set of these associated with the time interval.)">
+                                    <StackPanel Orientation="Vertical">
+
+                                        <Label x:Name="lb_gensky" Content="?gensky" Margin="0,2,0,0" FontWeight="Bold" MouseDoubleClick="Label_MouseDoubleClick" />
+
+                                        <TextBox x:Name="tbox_gensky" TextWrapping="Wrap"  MaxHeight="40" VerticalScrollBarVisibility="Auto" Padding="4,0">
+                                            gensky content here gensky content
+                                        </TextBox>
+
+                                        <Label x:Name="lb_oconv" Content="?oconv" Margin="0,2,0,0" FontWeight="Bold" MouseDoubleClick="Lb_oconv_MouseDoubleClick"/>
+                                        <TextBox x:Name="tbox_oconv" TextWrapping="Wrap"  MaxHeight="60" VerticalScrollBarVisibility="Auto" Padding="4,0">
+                                            oconv content here oconv content here oconv content here oconv content here oconv content here oconv content here oconv content here oconv content here oconv content here oconv content here oconv content here oconv content here oconv content here oconv content here oconv content here oconv content here
+                                        </TextBox>
+                                        <Label x:Name="lb_mkillum" Content="?mkillum" FontWeight="Bold" Margin="0,2,0,0" MouseDoubleClick="Lb_mkillum_MouseDoubleClick"/>
+                                        <TextBox x:Name="tbox_mkillum" TextWrapping="Wrap"  MaxHeight="60" VerticalScrollBarVisibility="Auto" Padding="4,0">
+                                            mkillum content here mkillum content here mkillum content here mkillum content here mkillum content here mkillum content here mkillum content here mkillum content here mkillum content here mkillum content here mkillum content here mkillum content here mkillum content here mkillum content here mkillum content here mkillum content here
+                                        </TextBox>
+
+                                        <Label x:Name="lb_ocon2" Content="?oconv 2nd pass" FontWeight="Bold" Margin="0,2,0,0" MouseDoubleClick="Lb_ocon2_MouseDoubleClick"/>
+                                        <TextBox x:Name="tbox_oconv2nd" TextWrapping="Wrap"  MaxHeight="60" VerticalScrollBarVisibility="Auto" Padding="4,0">
+                                            oconv content here oconv content here  oconv content here oconv content here oconv content here oconv content here  oconv content here oconv content here
+                                        </TextBox>
+                                        <Label x:Name="lb_rpict" Content="?rpict" FontWeight="Bold" Margin="0,2,0,0" MouseDoubleClick="Lb_rpict_MouseDoubleClick"/>
+                                        <TextBox x:Name="tbox_rpict" TextWrapping="Wrap" MaxHeight="80" VerticalScrollBarVisibility="Auto" Padding="4,0">
+                                            rpict content here rpict content here rpict content here rpict content here rpict content here rpict content here rpict content here rpict content here rpict content here rpict content here rpict content here rpict content here rpict content here rpict content here rpict content here rpict content here
+                                        </TextBox>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center"  >
+                                            <Label x:Name="lb_rpicti" Content="?rpict -i" VerticalContentAlignment="Center" VerticalAlignment="Center" Margin="0,2,0,0" FontWeight="Bold" MouseDoubleClick="Lb_rpicti_MouseDoubleClick"/>
+                                            <CheckBox Content="include rpict -i" VerticalAlignment="Center" VerticalContentAlignment="Center" Margin="10,8,0,0" IsChecked="{Binding IncRpictI, Mode=TwoWay}" Click="CheckBox_Click_1" />
+                                        </StackPanel>
+                                        <TextBox x:Name="tbox_rpicti" TextWrapping="Wrap"  MaxHeight="80" VerticalScrollBarVisibility="Auto" Padding="4,0">
+                                            rpict -i content here  rpict -i content here rpict -i content here  rpict -i content here rpict -i content here  rpict -i content here rpict -i content here  rpict -i content here rpict -i content here  rpict -i content here rpict -i content here  rpict -i content here rpict -i content here  rpict -i content here rpict -i content here  rpict -i content here
+                                        </TextBox>
+
+                                    </StackPanel>
+
+                                </GroupBox>
+                            </StackPanel>
+                        </TabItem>
+
+                        <TabItem x:Name="tabitem_Scenes" Header="Scenes">
+                            <StackPanel Orientation="Vertical">
+                                <GroupBox Header="Scene Argument">
+                                    <TextBox x:Name="scene_arg" TextWrapping="Wrap" BorderThickness="0" Background="#FFE3E9EF" Margin="0,4,0,0" MaxWidth="940" MinHeight="60" MaxHeight="60" VerticalScrollBarVisibility="Auto" >
+
+                                    </TextBox>
+                                </GroupBox>
+                                <GroupBox Header="Base Scene">
+                                    <DockPanel
+                                        HorizontalAlignment="Stretch" 
+                                        VerticalAlignment="Stretch" 
+                                        Height="Auto" 
+                                        >
+
+                                        <ListBox x:Name="listboxSSS" DockPanel.Dock="Left"  MinWidth="200" MinHeight="100" MaxHeight="200" Margin="0,6">
+                                            <CheckBox Content="This Item"/>
+
+                                        </ListBox>
+
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                            <ListBox x:Name="listboxBaseSceneChoices"   MinWidth="250" MinHeight="100" MaxHeight="200" Margin="0,4" VerticalContentAlignment="Stretch" HorizontalAlignment="Left">
+                                                <CheckBox Content="This Item__A"/>
+
+                                            </ListBox>
+                                            <StackPanel Orientation="Vertical" Margin="0,4" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                <Button x:Name="but_basescene_useall" Content="Use All" Margin="10,5" Padding="4" Click="But_basescene_useall_Click" Height="30"/>
+                                                <Button x:Name="but_basescene_clear" Content="Clear" Margin="10,5" Padding="4" Click="But_basescene_clear_Click" Height="30"/>
+                                                <Button x:Name="but_basescene_up" Content="Move /\" Margin="10,5" Padding="4" Click="But_basescene_up_Click" Height="30"/>
+                                                <Button x:Name="but_basescene_dwn" Content="Move \/" Margin="10,5" Padding="4" Click="But_basescene_dwn_Click" Height="30"/>
+
+                                            </StackPanel>
+                                            <StackPanel Orientation="Vertical" VerticalAlignment="Stretch"  Margin="0,4" MinHeight="200" MaxHeight="200">
+                                                <ListBox x:Name="listboxBaseSceneToArg"  Width="250" MinHeight="162"  MaxHeight="162" Margin="0" SelectionChanged="ListboxScenes_SelectionChanged"/>
+                                                <DockPanel Margin="0,4,0,0" >
+                                                    <Button DockPanel.Dock="Left"   x:Name="but_save_sss" Content="Save SSS"  Padding="4" Click="But_save_sss_Click"   VerticalContentAlignment="Center" Height="30"/>
+                                                    <TextBox x:Name="txb_sss_name" Width="170" VerticalAlignment="Center" HorizontalAlignment="right" VerticalContentAlignment="Center"></TextBox>
+                                                </DockPanel>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </DockPanel>
+                                </GroupBox>
+                                <Expander Header="Base Scene Path" IsExpanded="False">
+                                    <GroupBox >
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBox x:Name="tbox_basescenepath" MinWidth="300" Text="{Binding BScnPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MouseDoubleClick="Tbox_basescenepath_MouseDoubleClick" Padding="4,0" TextChanged="Tbox_basescenepath_TextChanged" LostFocus="FolderTboxEndsInBackSlash" VerticalAlignment="Center" />
+                                            <Button x:Name="ExplBSP" Content="Explorer" Padding="10,0,10,0" Margin="10,2,0,2" Click="ExplBSP_Click" Height="30" />
+                                        </StackPanel>
+                                    </GroupBox>
+                                </Expander>
+
+                                <GroupBox x:Name="groupBoxSceneFile" Header="Scene File View">
+                                    <TextBox x:Name="tbox_scenefileview" TextWrapping="Wrap" MaxHeight="100" VerticalScrollBarVisibility="Auto" IsReadOnly="True" MouseDoubleClick="Tbox_scenefileview_MouseDoubleClick">
+
+                                    </TextBox>
+                                </GroupBox>
+
+                                <Expander Header="Variable Scene" IsExpanded="False" >
+                                    <GroupBox >
+                                        <DockPanel
+                                        HorizontalAlignment="Stretch" 
+                                        VerticalAlignment="Stretch" 
+                                        Height="Auto" 
+                                        >
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                                <ListBox x:Name="listboxVarSceneChoices"   MinWidth="250" MinHeight="100" MaxHeight="200" Margin="0,8" >
+
+                                                </ListBox>
+                                                <StackPanel Orientation="Vertical" Margin="0,8" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <Button x:Name="but_varscene_useall" Content="Use All" Margin="10,5" Padding="4" Click="But_varscene_useall_Click" Height="30"/>
+                                                    <Button x:Name="but_varscene_clear" Content="Clear" Margin="10,5" Padding="4" Click="But_varscene_clear_Click" Height="30"/>
+                                                </StackPanel>
+                                                <ListBox x:Name="listboxSelVarSceneToArg"  Width="250" MinHeight="100" MaxHeight="200" Margin="0,8">
+
+                                                </ListBox>
+                                            </StackPanel>
+                                        </DockPanel>
+                                    </GroupBox>
+                                </Expander>
+                                <Expander Header="Variable Scene Path" IsExpanded="False" >
+                                    <GroupBox >
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBox x:Name="tbox_varscenepath" MinWidth="300" Text="{Binding VScnPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MouseDoubleClick="Tbox_varscenepath_MouseDoubleClick" Padding="4,0" TextChanged="Tbox_varscenepath_TextChanged" LostFocus="FolderTboxEndsInBackSlash" VerticalAlignment="Center"/>
+                                            <Button x:Name="ExplVSP" Content="Explorer"  Padding="10,0,10,0" Margin="10,2,0,2" Click="ExplVSP_Click" Height="30" />
+                                        </StackPanel>
+                                    </GroupBox>
+                                </Expander>
+                            </StackPanel>
+                        </TabItem>
+
+                        <TabItem x:Name="tabitem_Materials" Header="Materials">
+                            <StackPanel Orientation="Vertical">
+                                <GroupBox Header="Materials">
+                                    <DockPanel
+                                        HorizontalAlignment="Stretch" 
+                                        VerticalAlignment="Stretch" 
+                                        Height="Auto" 
+                                        >
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,10,0" >
+                                            <ListBox x:Name="listbox_mat_choices"   MinWidth="250" MinHeight="80" MaxHeight="300" Margin="0,8"  >
+                                                <CheckBox Content="This Mat Item A" />
+                                            </ListBox>
+                                            <StackPanel Orientation="Vertical" Margin="0,8" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                <Button x:Name="but_mat_useall" Content="Use All" Margin="10,5" Padding="4" Click="But_mat_useall_Click" Height="30"/>
+                                                <Button x:Name="but_mat_clear" Content="Clear" Margin="10,5" Padding="4" Click="But_mat_clear_Click" Height="30"/>
+                                            </StackPanel>
+                                            <ListBox x:Name="listbox_mat_sel"  Width="250" MinHeight="80" MaxHeight="300" Margin="0,8" SelectionChanged="Listbox_mat_sel_SelectionChanged">
+
+                                            </ListBox>
+                                        </StackPanel>
+                                        <GroupBox Header="Materials Argument" >
+                                            <TextBox x:Name="mat_arg" TextWrapping="Wrap"  BorderThickness="0" Background="#FFE3E9EF" Margin="0,6,0,0" MaxWidth="400" MaxHeight="300" VerticalScrollBarVisibility="Visible" >
+
+                                            </TextBox>
+                                        </GroupBox>
+                                    </DockPanel>
+
+                                </GroupBox>
+                                <Expander Header="Materials Path" IsExpanded="False">
+                                    <GroupBox >
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBox x:Name="tbox_matpath" MinWidth="300" Text="{Binding MatPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MouseDoubleClick="Tbox_matpath_MouseDoubleClick" Padding="4,0" LostFocus="FolderTboxEndsInBackSlash" TextChanged="Tbox_matpath_TextChanged" VerticalAlignment="Center"/>
+                                            <Button x:Name="ExplMat" Content="Explorer"  Padding="10,0,10,0" Margin="10,2,0,2" Click="ExplMat_Click" Height="30" />
+                                        </StackPanel>
+                                    </GroupBox>
+                                </Expander>
+                                <GroupBox x:Name="groupBoxMatFile" Header="Materials File View">
+                                    <Grid MaxHeight="240">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition />
+                                            <RowDefinition Height="5"/>
+                                            <RowDefinition />
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <TextBox x:Name="tbox_matfileview"
+                                                 Grid.Row="0" Grid.Column="0"
+                                                 TextWrapping="Wrap"
+                                                 MinHeight="60" 
+                                                 AcceptsReturn="True" IsReadOnly="True" 
+                                                 VerticalScrollBarVisibility="Visible"
+                                                 MouseDoubleClick="Tbox_matfileview_MouseDoubleClick"/>
+
+                                        <GridSplitter ResizeDirection="Rows" 
+                                                      Grid.Row="1" 
+                                                      HorizontalAlignment="Stretch" 
+                                                      ShowsPreview="True" />
+                                    </Grid>
+                                </GroupBox>
+                            </StackPanel>
+                        </TabItem>
+
+                        <TabItem x:Name="tabitem_ViewsSettings" Header="Views Setting">
+                            <StackPanel Orientation="Vertical">
+                                <GroupBox Header="Other Settings">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition/>
+                                            <RowDefinition/>
+                                            <RowDefinition/>
+                                            <RowDefinition/>
+                                            <RowDefinition MinHeight="10" />
+                                            <RowDefinition/>
+                                            <RowDefinition/>
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="2*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Label Content="Oct Path:" HorizontalContentAlignment="Right"/>
+                                        <TextBox Grid.Column="1" x:Name="tbox_octpath" VerticalContentAlignment="Center" VerticalAlignment="Center" Text="{Binding OctPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MouseDoubleClick="Tbox_octpath_MouseDoubleClick" Padding="4,0" LostFocus="FolderTboxEndsInBackSlash" TextChanged="Tbox_octpath_TextChanged"/>
+                                        <Label Content="Amb Path:" Grid.Row="1" HorizontalContentAlignment="Right"/>
+                                        <TextBox Grid.Row="1" Grid.Column="1" x:Name="tbox_ambpath" VerticalContentAlignment="Center" VerticalAlignment="Center" Text="{Binding AmbPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MouseDoubleClick="Tbox_ambpath_MouseDoubleClick" Padding="4,0" LostFocus="FolderTboxEndsInBackSlash" TextChanged="Tbox_ambpath_TextChanged"/>
+                                        <Label Content="Image Path:" Grid.Row="2" HorizontalContentAlignment="Right"/>
+                                        <TextBox Grid.Row="2" Grid.Column="1" x:Name="tbox_imgpath" VerticalContentAlignment="Center" VerticalAlignment="Center" Text="{Binding ImagePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MouseDoubleClick="Tbox_imgpath_MouseDoubleClick" Padding="4,0" LostFocus="FolderTboxEndsInBackSlash" TextChanged="Tbox_imgpath_TextChanged"/>
+                                        <Label Content="Irrad Path:" Grid.Row="3" HorizontalContentAlignment="Right"/>
+                                        <TextBox Grid.Row="3" Grid.Column="1" x:Name="tbox_irradpath" VerticalContentAlignment="Center" VerticalAlignment="Center" Text="{Binding IrradPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MouseDoubleClick="Tbox_irradpath_MouseDoubleClick" Padding="4,0" LostFocus="FolderTboxEndsInBackSlash" TextChanged="Tbox_irradpath_TextChanged"/>
+                                        <Label Content="View Path:" Grid.Row="6" HorizontalContentAlignment="Right"/>
+                                        <TextBox Grid.Row="6" Grid.Column="1" x:Name="tbox_viewpath" VerticalContentAlignment="Center" VerticalAlignment="Center" Text="{Binding ViewPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MouseDoubleClick="Tbox_viewpath_MouseDoubleClick" Padding="4,0" LostFocus="FolderTboxEndsInBackSlash" TextChanged="Tbox_viewpath_TextChanged"/>
+
+                                        <GroupBox Header="Image Size In Pixels" Grid.Row="0" Grid.Column="2" Grid.RowSpan="4" Margin="6,0,0,0" >
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition/>
+                                                    <RowDefinition/>
+                                                    <RowDefinition/>
+                                                </Grid.RowDefinitions>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Content="X:" Grid.Row="0" HorizontalContentAlignment="Center"/>
+                                                <TextBox Grid.Column="1" x:Name="tbox_imgX" VerticalContentAlignment="Center" VerticalAlignment="Center" HorizontalContentAlignment="Center" Text="{Binding ImgX, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                                <Label Content="Y:" Grid.Row="0" Grid.Column="2"  HorizontalContentAlignment="Center"/>
+                                                <TextBox Grid.Column="3" x:Name="tbox_imgY" VerticalContentAlignment="Center" VerticalAlignment="Center" HorizontalContentAlignment="Center" Text="{Binding ImgY, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                                <CheckBox Grid.Row="1" Content="Use Overture Image" Grid.ColumnSpan="3" VerticalContentAlignment="Center" VerticalAlignment="Center" IsChecked="{Binding UseOverture, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Click="CheckBox_NightTime_Click" />
+                                                <Label Content="X:" Grid.Row="2" HorizontalContentAlignment="Center"/>
+                                                <TextBox Grid.Column="1"  Grid.Row="2" x:Name="tbox_imgoveX" VerticalContentAlignment="Center" VerticalAlignment="Center" HorizontalContentAlignment="Center" Text="{Binding OvImgX, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                                <Label Content="Y:" Grid.Row="2" Grid.Column="2"  HorizontalContentAlignment="Center"/>
+                                                <TextBox Grid.Column="3" Grid.Row="2" x:Name="tbox_imgoveY" VerticalContentAlignment="Center" VerticalAlignment="Center" HorizontalContentAlignment="Center" Text="{Binding OvImgY, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                            </Grid>
+
+
+                                        </GroupBox>
+                                    </Grid>
+                                </GroupBox>
+
+                                <GroupBox Header="Views List">
+                                    <DockPanel
+                                        HorizontalAlignment="Stretch" 
+                                        VerticalAlignment="Stretch" 
+                                        Height="Auto" 
+                                        >
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,10,0" >
+                                            <ListBox x:Name="listbox_views_choices"   MinWidth="250" MinHeight="100" Margin="0,8">
+                                                <CheckBox Content="This view A"/>
+                                            </ListBox>
+                                            <StackPanel Orientation="Vertical" Margin="0,8" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                <Button x:Name="but_view_useall" Content="Use All" Margin="10,5" Padding="4" Click="But_view_useall_Click" Height="30"/>
+                                                <Button x:Name="but_view_clear" Content="Clear" Margin="10,5" Padding="4" Click="But_view_clear_Click" Height="30"/>
+                                            </StackPanel>
+                                            <ListBox x:Name="listbox_view_sel"  Width="250" MinHeight="100" Margin="0,8" SelectionChanged="Listbox_view_sel_SelectionChanged">
+
+                                            </ListBox>
+                                        </StackPanel>
+                                    </DockPanel>
+                                </GroupBox>
+                                <GroupBox x:Name="groupBoxViews" Header="Views File View">
+                                    <TextBox x:Name="tbox_viewsfileview" TextWrapping="Wrap" MinHeight="40" IsReadOnly="True" MouseDoubleClick="Tbox_viewsfileview_MouseDoubleClick">
+                                    </TextBox>
+                                </GroupBox>
+                            </StackPanel>
+                        </TabItem>
+
+                        <TabItem x:Name="tabitem_Options" Header="Options">
+                            <StackPanel Orientation="Vertical">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="31*"/>
+                                        <ColumnDefinition Width="65*"/>
+                                        <ColumnDefinition Width="24*"/>
+                                        <ColumnDefinition Width="11*"/>
+                                        <ColumnDefinition Width="29*"/>
+                                        <ColumnDefinition Width="159*"/>
+                                        <ColumnDefinition Width="159*"/>
+                                        <ColumnDefinition Width="160*"/>
+                                        <ColumnDefinition Width="160*"/>
+                                        <ColumnDefinition Width="160*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="RenderOpt Path:" Grid.Row="0" HorizontalContentAlignment="Right" Grid.ColumnSpan="5"/>
+                                    <TextBox Grid.Column="5" x:Name="tbox_renderoptpath" VerticalContentAlignment="Center" VerticalAlignment="Center" Text="{Binding RenderOptsPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MouseDoubleClick="Tbox_renderoptpath_MouseDoubleClick" Margin="0,4" Padding="4,0" LostFocus="FolderTboxEndsInBackSlash" TextChanged="Tbox_renderoptpath_TextChanged"/>
+                                    <Label x:Name="lb_renderoptfile" Content="RenderOpt File:" Grid.Column="0" Grid.Row="1"  HorizontalContentAlignment="Right" Grid.ColumnSpan="5" MouseDown="Lb_renderoptfile_MouseDown"/>
+                                    <TextBox Grid.Column="5"  Grid.Row="1"  x:Name="tbox_renderoptfile" VerticalContentAlignment="Center" VerticalAlignment="Center" Text="{Binding RenderOptsFileName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,4" HorizontalContentAlignment="Center" Padding="4,0" IsReadOnly="True" TextChanged="Tbox_renderoptfile_TextChanged" MouseLeftButtonUp="An_options_tbox_MouseLeftButtonUp"/>
+                                    <Label x:Name="lb_mkillumoptfile" Content="MkillumOptFile:" Grid.Column="6" Grid.Row="1" HorizontalContentAlignment="Right" MouseDown="Lb_mkillumoptfile_MouseDown"/>
+                                    <TextBox Grid.Column="7"  Grid.Row="1" x:Name="tbox_mkillumoptfile" VerticalContentAlignment="Center" VerticalAlignment="Center" Text="{Binding MkillumOptsFileName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,4" HorizontalContentAlignment="Center" Padding="4,0" IsReadOnly="True" TextChanged="Tbox_mkillumoptfile_TextChanged" MouseLeftButtonUp="An_options_tbox_MouseLeftButtonUp"/>
+                                    <Label x:Name="lb_overtureoptfile" Content="OvertureOpt File:" Grid.Row="1" Grid.Column="8"  HorizontalContentAlignment="Right" MouseDown="Lb_overtureoptfile_MouseDown"/>
+                                    <TextBox Grid.Column="9" Grid.Row="1" x:Name="tbox_overtureoptfile" VerticalContentAlignment="Center" VerticalAlignment="Center" Text="{Binding OvertureOptsFileName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,4,4,4" HorizontalContentAlignment="Center" Padding="4,0" IsReadOnly="True" TextChanged="Tbox_overtureoptfile_TextChanged" MouseLeftButtonUp="An_options_tbox_MouseLeftButtonUp"/>
+                                </Grid>
+                                <GroupBox Header=" Options File Choices">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <ListBox x:Name="listbox_optionsfile_choices"   MinWidth="250" MinHeight="100" Margin="0,8" SelectionMode="Single">
+                                            <ListBoxItem Content="A ListBoxItem" VerticalContentAlignment="Center"/>
+                                        </ListBox>
+                                        <StackPanel Orientation="Vertical" Margin="0,8" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <Button x:Name="but_opts_setrenderopts" Content="Set As Render Options File" Margin="10,5" Padding="5" Click="But_opts_setrenderopts_Click" Height="30"/>
+                                            <Button x:Name="but_opts_setmkillumopts" Content="Set As Mkillum Options File" Margin="10,5" Padding="5" Click="But_opts_setmkillumopts_Click" Height="30"/>
+                                            <Button x:Name="but_opts_setovertureopts" Content="Set As Overture Options File" Margin="10,5" Padding="5" Click="But_opts_setovertureopts_Click" Height="30"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </GroupBox>
+
+                                <GroupBox  x:Name="groupBoxOptionsFile" Header="Options File View">
+                                    <TextBox x:Name="tbox_optionsfileview" TextWrapping="Wrap" MinHeight="40" IsReadOnly="True" MouseDoubleClick="Tbox_optionsfileview_MouseDoubleClick">
+                                    </TextBox>
+                                </GroupBox>
+                            </StackPanel>
+                        </TabItem>
+
+                        <TabItem x:Name="tabitem_PComb" Header="PComb">
+                            <GroupBox Header="Picture Combination">
+                                <DockPanel LastChildFill="True">
+                                    <StackPanel DockPanel.Dock="Left"  Orientation="Vertical" MaxWidth="290" MinWidth="290">
+                                        <StackPanel Orientation="Horizontal" >
+                                            <GroupBox Header="Pic Selections For PComb Line" MinHeight="40"  MaxHeight="160"  MaxWidth="290" MinWidth="290">
+                                                <ListBox x:Name="listbox_pcomb_selections"
+                                                         MinHeight="73"
+                                                         Drop="Listbox_pcomb_selections_Drop" 
+                                                         PreviewMouseLeftButtonDown="Listbox_pcomb_selections_PreviewMouseLeftButtonDown"
+                                                         DragOver="Listbox_pcomb_selections_DragOver" 
+                                                         AllowDrop="True" PreviewDragLeave="Listbox_pcomb_selections_PreviewDragLeave" />
+                                            </GroupBox>
+                                            <Popup  x:Name="myMoverPopup"
+                                                PlacementTarget="{Binding ElementName=me}"
+                                                Placement="MousePoint"
+                                                AllowsTransparency="True"
+                                                IsOpen="False">
+                                                <Border BorderBrush = "LightGray"
+                                                    BorderThickness="2"
+                                                    CornerRadius="6"
+                                                    Background="AliceBlue"
+                                                    Opacity="0.75">
+                                                    <StackPanel
+                                                           Orientation = "Horizontal"
+                                                           Margin="3">
+                                                        <Image Source="DragInsert.png"
+                                                           VerticalAlignment="Center"
+                                                           HorizontalAlignment="Left"
+                                                           Width="14"
+                                                           Height="14" />
+                                                        <TextBlock x:Name="popMoverText"
+                                                               FontSize = "14"
+                                                               FontWeight="Bold"
+                                                               VerticalAlignment="Center"
+                                                               Text="Moving: The PComb filter"
+                                                               Margin="8,0,4,0"/>
+                                                    </StackPanel>
+                                                </Border>
+                                            </Popup>
+                                        </StackPanel>
+                                        <GroupBox x:Name="gbox_pcombfilter" Header="List Filter (Use Regex Syntax)">
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                                <Image x:Name="bt_regen_pcomb"  Width="20" Height="20" Source ="{StaticResource ReloadImage}" Margin="0,0,2,0" MouseUp="Bt_regen_pcomb_MouseUp"  />
+                                                <ComboBox x:Name="combo_pcomfilter"
+                                                              IsEditable="True"
+                                                              MinWidth="182" MaxWidth="182" 
+                                                              StaysOpenOnEdit="True"  
+                                                             />
+                                                <Button x:Name="but_applypcombregexfilter" Content="+" Width="16"   VerticalAlignment="Center" Background="#FF97FF00" Click="But_applypcombregexfilter_Click" Margin="2,0,0,0" Focusable="False"  ></Button>
+                                                <Button x:Name="but_unapplypcombregexfilter" Content="-" Width="16"  VerticalAlignment="Center" Background="#FFFB0101" Click="But_unapplypcombregexfilter_Click" Margin="2,0,0,0" Focusable="False" HorizontalAlignment="Center"  ></Button>
+                                                <Button x:Name="but_removecombregexfilter" Content="x" Width="16"  VerticalAlignment="Center" Background="#FFD8CAFF"  Margin="2,0,0,0" Focusable="False" Click="RemoveComboRegex"  ></Button>
+                                                <Button x:Name="but_regexhelp" Content="?" Width="16"  VerticalAlignment="Center" Background="#FFFBC201" Margin="2,0,0,0" Focusable="False" Click="But_regexhelp_Click"  ></Button>
+                                            </StackPanel>
+                                        </GroupBox>
+                                        <GroupBox x:Name="gbox_autochecking" Header="Auto Checking">
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                                <TextBox x:Name="tbox_pcombregex" MinWidth="110" MaxWidth="110"></TextBox>
+                                                <Button x:Name="but_applypcombregex" Content="+" Width="16"  Click="But_applypcombregex_Click" VerticalAlignment="Center" Background="#FF97FF00" Margin="2,0,0,0" Focusable="False"  ></Button>
+                                                <Button x:Name="but_unapplypcombregex" Content="-" Width="16" Margin="2,0,8,0" Click="But_unapplypcombregex_Click" VerticalAlignment="Center" Background="#FFFB0101" Focusable="False"  ></Button>
+                                                <CheckBox x:Name="chk_sametime" Content="Same Time"  VerticalContentAlignment="Center" Margin="0,0,10,0" VerticalAlignment="Center" Focusable="False"  />
+                                                <Button x:Name="but_clearpcomb" Content="X" Width="16" Click="But_clearpcomb_Click" Background="Red" Focusable="False"  ></Button>
+                                            </StackPanel>
+                                        </GroupBox>
+                                        <ListBox x:Name="listbox_pcomb_choices" 
+                                                 MinHeight="150"  
+                                                 MaxHeight="400" 
+                                                 Margin="0,8"/>
+                                    </StackPanel>
+                                    <GroupBox x:Name="scriptassemblygroupbox" 
+                                              Header="Pcomb Script Assembly" 
+                                              MinWidth="400" MinHeight="40"  VerticalAlignment="Top">
+                                        <StackPanel x:Name="scriptassembly" Orientation="Vertical">
+                                            <Grid x:Name="pcombscriptbuttonsgrid" >
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition/>
+                                                </Grid.RowDefinitions>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition MaxWidth="70"/>
+                                                    <ColumnDefinition MaxWidth="70"/>
+                                                    <ColumnDefinition />
+                                                    <ColumnDefinition/>
+                                                    <ColumnDefinition />
+                                                    <ColumnDefinition />
+                                                </Grid.ColumnDefinitions>
+                                                <Label Content="?pcomb"
+                                                       Grid.Column="0"
+                                                       HorizontalAlignment="Center" 
+                                                       HorizontalContentAlignment="Center" 
+                                                       VerticalContentAlignment="Center" 
+                                                       VerticalAlignment="Center" 
+                                                       FontWeight="Bold" MouseDoubleClick="Label_MouseDoubleClick_1"></Label>
+                                                <CheckBox x:Name="chkbox_pcombnopause" Content="Pause"
+                                                        IsChecked="{Binding Pcombpause}" 
+                                                        Grid.Column="1" HorizontalContentAlignment="Center" 
+                                                        VerticalContentAlignment="Center"
+                                                        VerticalAlignment="Center" HorizontalAlignment="Center" Focusable="False"/>
+                                                <Button x:Name="but_makepcombscript" 
+                                                        Grid.Column="2"
+                                                        Content="Make Script" Click="But_makepcombscript_Click" Focusable="False"/>
+                                                <Button x:Name="but_viewpcombscript" 
+                                                        Grid.Column="3"
+                                                        Content="View Script" Click="But_viewpcombscript_Click" Margin="2,0" Focusable="False"/>
+                                                <TextBox x:Name="tbox_pcombscriptname" 
+                                                         Grid.Column="4"
+                                                         Text ="{Binding Path=PcombBatchFileName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                                         VerticalContentAlignment="Center" HorizontalContentAlignment="Center" TextChanged="Tbox_pcombscriptname_TextChanged"/>
+                                                <Button x:Name="but_executepcombscript" 
+                                                         Grid.Column="5"
+                                                        Content="Run Script" Click="But_executepcombscript_Click" Margin="2,0,0,0" Focusable="False"/>
+
+                                            </Grid>
+                                            <GroupBox x:Name="scalesgroupbox" Header="Using These Selected Parameters">
+                                                <Grid Margin="0,2" >
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition/>
+                                                    </Grid.RowDefinitions>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition/>
+                                                        <ColumnDefinition/>
+                                                        <ColumnDefinition/>
+                                                        <ColumnDefinition/>
+                                                        <ColumnDefinition/>
+                                                        <ColumnDefinition/>
+                                                        <ColumnDefinition/>
+                                                        <ColumnDefinition/>
+                                                        <ColumnDefinition/>
+                                                        <ColumnDefinition/>
+                                                        <ColumnDefinition/>
+                                                        <ColumnDefinition/>
+                                                        <ColumnDefinition/>
+                                                        <ColumnDefinition/>
+                                                        <ColumnDefinition/>
+                                                        <ColumnDefinition/>
+                                                        <ColumnDefinition/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <ToggleButton x:Name="tog_pcombh" Content="-h" 
+                                                                  IsChecked="{Binding Pcombh}" 
+                                                                  VerticalAlignment="Center"
+                                                                  HorizontalContentAlignment="Center" 
+                                                                  KeyUp="Tbox_anyscale_KeyUp" 
+                                                                  Click="Tog_pcombh_Click" 
+                                                                  BorderThickness="4" Focusable="False"
+                                                                  Unchecked="Tog_pcombh_Unchecked" Checked="Tog_pcombh_Checked"
+                                                                  VerticalContentAlignment="Stretch"  />
+                                                    <Label Content="-s"  Grid.Column="1" HorizontalAlignment="Right" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" VerticalAlignment="Center"  />
+                                                    <TextBox x:Name="tbox_scale1"
+                                                             Text="{Binding Scales[0], Mode=TwoWay,  StringFormat=0.00, UpdateSourceTrigger=PropertyChanged}"
+                                                             Grid.Column="2" Margin="0,0,2,0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"   KeyUp="Tbox_anyscale_KeyUp" Width="40" AllowDrop="False"/>
+                                                    <Label Content="-s"  Grid.Column="3" HorizontalAlignment="Right" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" VerticalAlignment="Center" />
+                                                    <TextBox x:Name="tbox_scale2"
+                                                             Text="{Binding Scales[1], Mode=TwoWay,  StringFormat=0.00, UpdateSourceTrigger=PropertyChanged}"
+                                                             Grid.Column="4" Margin="0,0,2,0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"   KeyUp="Tbox_anyscale_KeyUp" Width="40" AllowDrop="False"/>
+                                                    <Label Content="-s"  Grid.Column="5" HorizontalAlignment="Right" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" VerticalAlignment="Center" />
+                                                    <TextBox x:Name="tbox_scale3" 
+                                                             Text="{Binding Scales[2], Mode=TwoWay,  StringFormat=0.00, UpdateSourceTrigger=PropertyChanged}"
+                                                             Grid.Column="6" Margin="0,0,2,0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"   KeyUp="Tbox_anyscale_KeyUp" Width="40" AllowDrop="False"/>
+                                                    <Label Content="-s"  Grid.Column="7" HorizontalAlignment="Right" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" VerticalAlignment="Center" />
+                                                    <TextBox x:Name="tbox_scale4"
+                                                             Text="{Binding Scales[3], Mode=TwoWay,  StringFormat=0.00, UpdateSourceTrigger=PropertyChanged}"
+                                                             Grid.Column="8" Margin="0,0,2,0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"    KeyUp="Tbox_anyscale_KeyUp" Width="40" AllowDrop="False"/>
+                                                    <Label Content="-s"  Grid.Column="9" HorizontalAlignment="Right" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" VerticalAlignment="Center" />
+                                                    <TextBox x:Name="tbox_scale5"
+                                                             Text="{Binding Scales[4], Mode=TwoWay,  StringFormat=0.00,  UpdateSourceTrigger=PropertyChanged}"
+                                                             Grid.Column="10" Margin="0,0,2,0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"  KeyUp="Tbox_anyscale_KeyUp" Width="40" AllowDrop="False"/>
+                                                    <Label Content="-s"  Grid.Column="11" HorizontalAlignment="Right" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" VerticalAlignment="Center" />
+                                                    <TextBox x:Name="tbox_scale6"
+                                                             Text="{Binding Scales[5], Mode=TwoWay,  StringFormat=0.00, UpdateSourceTrigger=PropertyChanged}"
+                                                             Grid.Column="12" Margin="0,0,2,0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"   KeyUp="Tbox_anyscale_KeyUp" Width="40" AllowDrop="False"/>
+                                                    <Label Content="-s"  Grid.Column="13" HorizontalAlignment="Right" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" VerticalAlignment="Center" />
+                                                    <TextBox x:Name="tbox_scale7" 
+                                                             Text="{Binding Scales[6], Mode=TwoWay,  StringFormat=0.00, UpdateSourceTrigger=PropertyChanged}"
+                                                             Grid.Column="14" Margin="0,0,2,0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"  KeyUp="Tbox_anyscale_KeyUp" Width="40" AllowDrop="False"/>
+                                                    <Label Content="-s"  Grid.Column="15" HorizontalAlignment="Right" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" VerticalAlignment="Center" />
+                                                    <TextBox x:Name="tbox_scale8"
+                                                             Text="{Binding Scales[7], Mode=TwoWay, StringFormat=0.00, UpdateSourceTrigger=PropertyChanged}"
+                                                             Grid.Column="16" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"   KeyUp="Tbox_anyscale_KeyUp" Width="40" AllowDrop="False"/>
+                                                </Grid>
+                                            </GroupBox>
+                                            <GroupBox x:Name="groupboxTargetfile" Header="Pcomb To This Folder, Using This Target File Name">
+                                                <StackPanel x:Name="targetpathandname" Orientation="Horizontal">
+                                                    <Button x:Name="button_makeimagesubpath" 
+                                                            Content="Create This New Path?" 
+                                                            Visibility="Collapsed" Padding="4,0" 
+                                                            Margin="0,0,4,0" 
+                                                            Background="#FFA4F58D" Click="Button_makeimagesubpath_Click" />
+                                                    <TextBox x:Name="Tbox_pcombimagetargetpath" 
+                                                       Text="{Binding PcombimagetargetPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                       Margin="4,0" Padding="4,2" TextChanged="Tbox_pcombimagetargetpath_TextChanged" LostFocus="FolderTboxEndsInBackSlash" MouseDoubleClick="Tbox_pcombimagetargetpath_MouseDoubleClick" />
+                                                    <TextBox x:Name="textbox_pcom_target" 
+                                                             VerticalAlignment="Center" 
+                                                             VerticalContentAlignment="Center" 
+                                                             KeyUp="Textbox_pcom_target_KeyUp" 
+                                                             Padding="4,2" AllowDrop="False">
+                                                        target_file_name.pic
+                                                    </TextBox>
+                                                </StackPanel>
+                                            </GroupBox>
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" >
+                                                <Grid MaxWidth="900" >
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="Auto"/>
+                                                    </Grid.RowDefinitions>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="30"/>
+                                                        <ColumnDefinition  Width="50" />
+                                                        <ColumnDefinition  Width="*" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <Button x:Name="but_addpcombline" Grid.Row="0" Grid.Column="0"   Content="\ /" Margin="2,0,0,0" Click="But_addpcombline_Click" Focusable="False" ></Button>
+                                                    <Button x:Name="but_pccomb" 
+                                                            Grid.Row="0" 
+                                                            Grid.Column="1"
+                                                            Click="But_pccomb_Click" 
+                                                            Margin="4,0">
+                                                        <ContentControl>
+                                                            <Image Source = "{StaticResource Grears1Image}" />
+                                                        </ContentControl>
+                                                    </Button>
+                                                    <TextBox x:Name="tbox_pcombcandidate" Grid.Row="0" Grid.Column="2" TextWrapping="Wrap" VerticalContentAlignment="Center" Margin="2,0" Padding="4,0"   />
+                                                </Grid>
+                                            </StackPanel>
+                                            <Grid x:Name="pcomblines" Height="500">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition />
+                                                </Grid.ColumnDefinitions>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="5*" />
+                                                    <RowDefinition Height="5" />
+                                                    <RowDefinition/>
+                                                </Grid.RowDefinitions>
+
+                                                <ScrollViewer x:Name="pcomblinesscroller" 
+                                                              HorizontalScrollBarVisibility="Disabled"
+                                                              Grid.Row="0" Grid.Column="0">
+                                                    <ListBox x:Name="listbox_pcomblines"
+                                                     Margin="0,10,0,0"
+                                                     KeyUp="Listbox_pcomblines_KeyUp"
+                                                     SelectionMode="Extended"
+                                                     Padding="6,0" 
+                                                     ScrollViewer.HorizontalScrollBarVisibility="Disabled" >
+                                                        <ListBox.Resources>
+                                                            <Style TargetType="{x:Type TextBlock}">
+                                                                <Setter Property="TextWrapping" Value="Wrap" />
+                                                            </Style>
+                                                        </ListBox.Resources>
+                                                    </ListBox>
+                                                </ScrollViewer>
+                                                <GridSplitter ResizeDirection="Rows" 
+                                                              Grid.Row="1" 
+                                                              HorizontalAlignment="Stretch" 
+                                                              ShowsPreview="True" />
+                                                <Expander Header="Radiance File Header" 
+                                                          Grid.Row="2" Grid.Column="0"
+                                                          Margin="0,12,0,6" IsExpanded="True"  >
+                                                    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                                              HorizontalScrollBarVisibility="Auto"
+                                                              HorizontalContentAlignment="Stretch"
+                                                              VerticalContentAlignment="Stretch">
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <ToggleButton x:Name="Tog_getinfofull" 
+                                                                          Content="Full"
+                                                                          IsChecked="{Binding Getinfofull}"
+                                                                          VerticalContentAlignment="Center"
+                                                                          Padding="4,0" Focusable="False"
+                                                                          Click="Tog_getinfofull_Click"
+                                                                          HorizontalAlignment="Left" Margin="0,4,0,0" />
+                                                            <TextBlock x:Name="Tblock_radheader"
+                                                               TextWrapping="Wrap" Padding="8,0" Margin="4,4,0,0"/>
+                                                        </StackPanel>
+                                                    </ScrollViewer>
+                                                </Expander>
+                                            </Grid>
+                                        </StackPanel>
+                                    </GroupBox>
+                                </DockPanel>
+                            </GroupBox>
+                        </TabItem>
+
+                        <TabItem x:Name="tabitem_ratiff" Header="Pic to TIFF">
+                            <GroupBox x:Name="grpbox_ratiff" Header="Picture Conversion To Tiff">
+                                <Grid Margin="4,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition />
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition />
+                                        <ColumnDefinition Width="102" />
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition />
+                                        <ColumnDefinition />
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                    </Grid.RowDefinitions>
+                                    <Label Content="?ra__tiff" 
+                                           Grid.Row="0" Grid.Column="0"
+                                           HorizontalContentAlignment="left" 
+                                           VerticalContentAlignment="Stretch"
+                                           VerticalAlignment="Center" FontWeight="Bold"
+                                           MouseDoubleClick="Label_MouseDoubleClick_2"/>
+                                    <Button x:Name="but_runratiff" 
+                                            Content="Run ra__tiff"
+                                            Grid.Row="0" Grid.Column="1"
+                                            Margin="2,0"
+                                            Click="But_runratiff_Click"
+                                            Focusable="False"/>
+                                    <StackPanel Orientation="Horizontal"
+                                                Grid.Row="0" Grid.Column="2" 
+                                                Grid.ColumnSpan="7" 
+                                                HorizontalAlignment="Left">
+                                        <Label Content="ra__tiff Arguments: "
+                                               VerticalContentAlignment="Center" 
+                                               VerticalAlignment="Center" 
+                                               HorizontalContentAlignment="Right" 
+                                               Padding="5,5,0,5"/>
+                                        <TextBox x:Name="tbox_ratiff_arg"
+                                                 Width="150"
+                                                 MaxWidth="200"
+                                                 Margin="2,0" Padding="6,1"
+                                                 VerticalContentAlignment="Center" 
+                                                 VerticalAlignment="Center" TextChanged="Tbox_ratiff_arg_TextChanged" />
+                                        <StackPanel Orientation="Horizontal">
+                                            <Label x:Name="Lb_ratiff_arg_zLlfw" Content="[ -z or -L or -l or -f or -w ]"/>
+                                            <Label x:Name="Lb_ratiff_arg_b" Content="[ -b ]"/>
+                                            <Label x:Name="Lb_ratiff_arg_e" Content="[ -e +/-stops ]"/>
+                                            <Label x:Name="Lb_ratiff_arg_g" Content="[ -g gamma ]"/>
+                                        </StackPanel>
+                                    </StackPanel>
+
+                                    <TextBox x:Name="tbox_picsourcefolder" 
+                                         Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" 
+                                         Text="{Binding PcombimagesourcePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                         MouseDoubleClick="Tbox_picsourcefolder_MouseDoubleClick" 
+                                         Padding="6,0" Margin="0,6" TextChanged="Tbox_picsourcefolder_TextChanged" 
+                                         LostFocus="FolderTboxEndsInBackSlash"/>
+                                    <TextBox x:Name="tbox_tiffresultsfolder" 
+                                         Grid.Row="1" Grid.Column="3" Grid.ColumnSpan="3" 
+                                         Text="{Binding RatiffimagePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                         Margin="4,6" Padding="6,0" MouseDoubleClick="Tbox_tiffresultsfolder_MouseDoubleClick" 
+                                         TextChanged="Tbox_tiffresultsfolder_TextChanged" 
+                                         LostFocus="FolderTboxEndsInBackSlash" />
+                                    <Button x:Name="but_picsource_selectall"
+                                            Grid.Row="2" Grid.Column="0"
+                                            Content="Check All" Margin="2,0" Click="But_picsource_selectall_Click"
+                                            Focusable="False"/>
+                                    <Button x:Name="but_picsource_selectnone"
+                                            Grid.Row="2" Grid.Column="1"
+                                            Content="Check None" Margin="2,0" Click="But_picsource_selectnone_Click"
+                                            Focusable="False"/>
+
+                                    <CheckBox x:Name="chkbox_tiffpause" Content="Observe ra__tiff Process"
+                                                        IsChecked="{Binding Ratiffpause}"
+                                                        Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="2"
+                                                        HorizontalContentAlignment="Center" 
+                                                        VerticalContentAlignment="Center"
+                                                        VerticalAlignment="Center" 
+                                                        HorizontalAlignment="Center" Focusable="False"/>
+                                    <Button x:Name="But_rename_pictotiffresult"
+                                            Grid.Row="2" Grid.Column="4"
+                                            Content="Rename" Margin="2,0" 
+                                            Focusable="False" Click="But_rename_pictotiffresult_Click" />
+                                    <Button x:Name="but_explorer_result"
+                                            Grid.Row="2" Grid.Column="5"
+                                            Content="Explorer" Margin="2,0" 
+                                            Focusable="False" Click="But_explorer_result_Click"/>
+                                    <ListBox x:Name="listbox_pic_choices" 
+                                         Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3"
+                                          Height="410" Margin="0,5,0,0"
+                                         VerticalAlignment="Top" >
+                                        <CheckBox Content="pic item"/>
+                                    </ListBox>
+                                    <ListBox x:Name="listbox_tiff_results"
+                                         Grid.Row="3" Grid.Column="3" Grid.ColumnSpan="3"
+                                          Height="410" Margin="4,5,4,0" 
+                                         SelectionChanged="Listbox_tiff_results_SelectionChanged"
+                                         MouseUp="Listbox_tiff_results_MouseUp" VerticalAlignment="Top" KeyUp="Listbox_tiff_results_KeyUp" SelectionMode="Extended" MouseRightButtonUp="Listbox_tiff_results_MouseRightButtonUp"/>
+
+                                    <Border Background="GhostWhite" 
+                                            BorderBrush="Gainsboro"
+                                            Grid.Row="3" Grid.Column="6" Grid.ColumnSpan="3" 
+                                            BorderThickness="1" CornerRadius="6">
+                                        <StackPanel Orientation="Vertical" 
+                                                Width="380"
+                                                Height="410"
+                                                Margin="0,5,0,0">
+                                            <Image x:Name="img_tiffconversion"
+                                                MaxHeight="380" Margin="4,0"/>
+                                            <Label x:Name="lbl_tiffname"
+                                               HorizontalAlignment="Center"
+                                               VerticalContentAlignment="Bottom"
+                                               VerticalAlignment="Center"
+                                               HorizontalContentAlignment="Center"/>
+                                        </StackPanel>
+                                    </Border>
+
+                                </Grid>
+                            </GroupBox>
+                        </TabItem>
+
+                        <TabItem x:Name="Tabitem_tifftoother" Header="Tiff to Other">
+                            <GroupBox x:Name="grpbox_tifftootehr" Header="Tiff Conversion To Other">
+                                <Grid Margin="4,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="2*" />
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition />
+                                        <ColumnDefinition  />
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition />
+                                        <ColumnDefinition />
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition />
+                                        <ColumnDefinition />
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition Width="2*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                    </Grid.RowDefinitions>
+                                    <Label x:Name="lbl_imagemagick" Content="?Imagemagick" 
+                                           Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
+                                           HorizontalContentAlignment="left" 
+                                           VerticalContentAlignment="Stretch"
+                                           VerticalAlignment="Center" FontWeight="Bold" MouseDoubleClick="Lbl_imagemagick_MouseDoubleClick"/>
+                                    <Button x:Name="But_runtifftoother" 
+                                            Content="Convert"
+                                            Grid.Row="0" Grid.Column="1"
+                                            Margin="2,0"
+                                            Focusable="False" Click="But_runtifftoother_Click"/>
+                                    <StackPanel Orientation="Horizontal"
+                                                Grid.Row="0" Grid.Column="2" 
+                                                Grid.ColumnSpan="7" 
+                                                HorizontalAlignment="Left">
+                                        <Label Content="Image Type:" Padding="10,5,2,5"/>
+                                        <TextBox x:Name="Tbox_magicktype"
+                                                 Text="{Binding FinalimageType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                                 MinWidth="60"
+                                                 Margin="2,0" Padding="4,1" TextChanged="Tbox_magicktype_TextChanged" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"
+                                                 />
+                                        <Label Content="Conversion Arguments: "
+                                               VerticalContentAlignment="Center" 
+                                               VerticalAlignment="Center" 
+                                               HorizontalContentAlignment="Right" 
+                                               Padding="5,5,0,5"/>
+                                        <TextBox x:Name="tbox_imagemagick_arg"
+                                                 Width="200" 
+                                                 Margin="2,0" Padding="6,1"
+                                                 VerticalContentAlignment="Center" HorizontalContentAlignment="left" />
+                                    </StackPanel>
+                                    <TextBox x:Name="tbox_tiffsourcefolder" 
+                                         Grid.Row="1" Grid.Column="3" Grid.ColumnSpan="3" 
+                                         Text="{Binding RatiffimagePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                         Padding="6,0" Margin="0,6" 
+                                         LostFocus="FolderTboxEndsInBackSlash" MouseDoubleClick="Tbox_tiffsourcefolder_MouseDoubleClick" TextChanged="Tbox_tiffsourcefolder_TextChanged"
+                                         />
+                                    <TextBox x:Name="tbox_conversionresultsfolder" 
+                                         Grid.Row="1" Grid.Column="6" Grid.ColumnSpan="3" 
+                                         Text="{Binding FinalimagePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                         Margin="4,6" Padding="6,0" 
+                                         LostFocus="FolderTboxEndsInBackSlash" MouseDoubleClick="Tbox_conversionresultsfolder_MouseDoubleClick" TextChanged="Tbox_conversionresultsfolder_TextChanged" />
+                                    <Button x:Name="buttiffsource_selectall"
+                                            Grid.Row="2" Grid.Column="3"
+                                            Content="Check All" Margin="2,0" 
+                                            Focusable="False" Click="Buttiffsource_selectall_Click"/>
+                                    <Button x:Name="Buttiffsource_selectnone"
+                                            Grid.Row="2" Grid.Column="4"
+                                            Content="Check None" Margin="2,0" 
+                                            Focusable="False" Click="Buttiffsource_selectnone_Click" Padding="4,1"/>
+                                    <CheckBox x:Name="chkbox_magicpause" Content="Observe Process"
+                                                        Grid.Row="2" Grid.Column="5" Grid.ColumnSpan="2"
+                                                        HorizontalContentAlignment="Center" 
+                                                        VerticalContentAlignment="Center"
+                                                        VerticalAlignment="Center" 
+                                                        HorizontalAlignment="Center" Focusable="False"/>
+                                    <Button x:Name="but_rename_magicresult"
+                                            Grid.Row="2" Grid.Column="7"
+                                            Content="Rename" Margin="2,0" 
+                                            Focusable="False" Click="But_rename_magicresult_Click"/>
+                                    <Button x:Name="but_explorer_magicresult"
+                                            Grid.Row="2" Grid.Column="8"
+                                            Content="Explorer" Margin="2,0" 
+                                            Focusable="False" Click="But_explorer_magicresult_Click" />
+                                    <ListBox x:Name="listbox_finaltiff_choices" 
+                                         Grid.Row="3" Grid.Column="3" Grid.ColumnSpan="3"
+                                         Height="410" Margin="4,5,0,0"
+                                         SelectionMode="Extended"
+                                         VerticalAlignment="Top" >
+                                        <CheckBox Content="tiff item"/>
+                                    </ListBox>
+                                    <ListBox x:Name="listbox_magick_results"
+                                         Grid.Row="3" Grid.Column="6" Grid.ColumnSpan="3"
+                                         Height="410" Margin="4,5,4,0" 
+                                         VerticalAlignment="Top" 
+                                         SelectionMode="Extended" 
+                                         SelectionChanged="Listbox_magick_results_SelectionChanged" 
+                                         MouseUp="Listbox_magick_results_MouseUp" 
+                                         KeyUp="Listbox_magick_results_KeyUp" 
+                                         MouseRightButtonUp="Listbox_magick_results_MouseRightButtonUp"/>
+                                    <Border Background="GhostWhite"
+                                            Grid.Row="3" Grid.Column="9" Grid.ColumnSpan="3" 
+                                            BorderBrush="Gainsboro"
+                                            BorderThickness="1" CornerRadius="6">
+                                        <StackPanel Orientation="Vertical" 
+                                                Width="380"
+                                                Margin="0,3,0,2">
+                                            <Image x:Name="img_magicconversion"
+                                                MinWidth="380"   
+                                                MaxHeight="380" Margin="4,0"  />
+                                            <Label x:Name="lbl_magickname"
+                                               HorizontalAlignment="Center"
+                                               VerticalContentAlignment="Bottom"
+                                               VerticalAlignment="Center"
+                                               HorizontalContentAlignment="Center"/>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <Border Background="GhostWhite" 
+                                            Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" 
+                                            BorderBrush="Gainsboro"
+                                            BorderThickness="1" CornerRadius="6">
+                                        <StackPanel Orientation="Vertical" 
+                                                Width="380"
+                                                Height="410"
+                                                Margin="0,5,0,0">
+                                            <Image x:Name="img_magicsource"
+                                                MaxHeight="380" Margin="4,0"  />
+                                            <Label x:Name="lbl_magicksource"
+                                               HorizontalAlignment="Center"
+                                               VerticalContentAlignment="Bottom"
+                                               VerticalAlignment="Center"
+                                               HorizontalContentAlignment="Center"/>
+                                        </StackPanel>
+                                    </Border>
+                                </Grid>
+                            </GroupBox>
+
+
+                        </TabItem>
+
+                        <TabItem x:Name="tabitem_Utilities" Header="Utilities">
+                            <StackPanel Orientation="Vertical">
+                                <Button x:Name="Button_UtilityEditor" Content="Replace String Utility" Padding="4" Margin="4,10" Height="30" Focusable="False" Click="Button_UtilityEditorClick"></Button>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
+                                    <GroupBox Header="HDR Viewer">
+
+                                        <TextBox x:Name="tb_hdrviewer" 
+                                                 Text="{Binding Hdrviewer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                 MinWidth="300" MouseDoubleClick="Tb_hdrviewer_MouseDoubleClick"
+                                                 Margin="6,0" TextChanged="TextBox_ForFileName_TextChanged"/>
+
+                                    </GroupBox>
+                                    <GroupBox Header="Editor Path">
+
+                                        <TextBox x:Name="tb_editorspath" 
+                                                     Text="{Binding EditorPath,
+                                                     Mode=TwoWay,
+                                                     UpdateSourceTrigger=PropertyChanged}"
+                                                     MinWidth="300" 
+                                                     Margin="6,0" MouseDoubleClick="Tb_editorspath_MouseDoubleClick" TextChanged="TextBox_ForFileName_TextChanged"/>
+
+                                    </GroupBox>
+                                    <GroupBox Header="Preferences Path">
+
+                                        <TextBox x:Name="tb_prefspath" 
+                                                     Text="{Binding PrefsPath,
+                                                     Mode=TwoWay,
+                                                     UpdateSourceTrigger=PropertyChanged}"
+                                                     MinWidth="300" 
+                                                     Margin="6,0" LostFocus="FolderTboxEndsInBackSlash" MouseDoubleClick="Tb_prefspath_MouseDoubleClick" TextChanged="Tb_prefspath_TextChanged"/>
+
+                                    </GroupBox>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <GroupBox Header="ImageMagick Path">
+
+                                        <TextBox x:Name="tb_magick" 
+                                                     Text="{Binding MagickPath,
+                                                     Mode=TwoWay,
+                                                     UpdateSourceTrigger=PropertyChanged}"
+                                                     MinWidth="300" 
+                                                     Margin="6,0" Padding="1" VerticalAlignment="Center"/>
+
+                                    </GroupBox>
+
+                                    <GroupBox Header="Installed GhostScript Path">
+
+                                        <Label x:Name="tb_ghostscript" 
+                                                 Content="{Binding GhostScriptPath,
+                                                 Mode=TwoWay,
+                                                 UpdateSourceTrigger=PropertyChanged}"
+                                                 MinWidth="300" 
+                                                 Margin="6,0" Padding="1" VerticalAlignment="Center"
+                                                 Focusable="False"
+                                                 AllowDrop="False"
+                                                 IsHitTestVisible="False"
+                                                 IsTabStop="False"/>
+
+                                    </GroupBox>
+
+                                </StackPanel>
+                                <GroupBox Header="Create Rad Directory Structure" Margin="0,10,0,0">
+                                    <Grid x:Name="grid_radfolders" >
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition/>
+                                            <RowDefinition MinHeight="20"/>
+                                            <RowDefinition MinHeight="20"/>
+                                            <RowDefinition MinHeight="20"/>
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition/>
+                                            <ColumnDefinition/>
+                                            <ColumnDefinition/>
+                                            <ColumnDefinition/>
+                                            <ColumnDefinition/>
+                                            <ColumnDefinition/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <GroupBox Grid.Row="0" Grid.Column="0" Header="Where the directories will be made" Grid.ColumnSpan="3" Margin="0,0,0,4" >
+                                            <TextBox  x:Name="tbox_radwhereroot" VerticalContentAlignment="Center" VerticalAlignment="Center"  Background="#FFE3E9EF" Text="{Binding ProjectPath}" />
+                                        </GroupBox>
+                                        <Button Content="Clear Selections" x:Name="mkrpaths_clear"  Grid.Row="0" Grid.Column="4" VerticalAlignment="Bottom" Margin="4,0,4,8" Height="30" Click="Mkrpaths_clear_Click" Focusable="False"/>
+                                        <Button Content="Create Directories" x:Name="mkrpaths_doit"  Grid.Row="0" Grid.Column="5" VerticalAlignment="Bottom" Margin="4,0,0,8" Height="30" Click="Mkrpaths_doit_Click" Focusable="False"/>
+                                    </Grid>
+                                </GroupBox>
+                            </StackPanel>
+                        </TabItem>
+
+                    </TabControl>
+                </Grid>
+            </StackPanel>
+        </StackPanel>
+
+
+
+
+    </Border>
+
+</Window>

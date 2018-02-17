@@ -1,0 +1,359 @@
+﻿<Window x:Class="WpfRadScript.FileRenamerWPF"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WpfRadScript"
+        mc:Ignorable="d"
+        Width="600"
+        Height="300"
+        MinWidth="600"
+        MaxWidth="600"
+        FontSize="14"
+        SizeToContent="WidthAndHeight"
+        Topmost="True" 
+        WindowStyle="None"
+        Background="Transparent"
+        AllowsTransparency="True"
+        BorderThickness="0"
+        MouseDown="DragWindow" 
+        Closing="Window_Closing">
+    <Window.Resources>
+        <Style x:Key="{x:Type ToolTip}"
+             TargetType="{x:Type ToolTip}">
+            <Setter Property="Background"
+                    Value="Transparent" />
+            <Setter Property="BorderThickness"
+                    Value="0"/>
+        </Style>
+        <BitmapImage x:Key="ResetImage" UriSource="reset32.png" />
+        <BitmapImage x:Key="UndoImage" UriSource="undo32.png" />
+        <BitmapImage x:Key="AddToFront" UriSource="addtofront32.png" />
+        <BitmapImage x:Key="AddToBack" UriSource="addtoback32.png" />
+    </Window.Resources>
+    <Border Name ="Body" 
+            Background="AliceBlue"
+            CornerRadius="24"
+            BorderThickness="3"
+            BorderBrush="DarkGray"
+            >
+        <StackPanel Orientation="Vertical" Margin="10">
+            <Grid x:Name="grid_topline">
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Label x:Name="Lb_topmsg"
+                           Grid.Column="0"
+                           Grid.ColumnSpan="8"
+                           Margin="0,0,10,0" />
+                <Button x:Name="But_Reset" 
+                        Grid.Column="7"
+                        HorizontalAlignment="Center" 
+                        Click="But_Reset_Click" Focusable="False"
+                        ToolTipService.IsEnabled="{Binding IsChecked,ElementName=Tog_ToolTips}"
+                        ToolTipService.ShowDuration="10000"  ToolTipService.VerticalOffset="-140">
+                    <ContentControl>
+                        <Image Source = "{StaticResource ResetImage}" Width="24"  />
+                    </ContentControl>
+                    <Button.ToolTip >
+                        <Border CornerRadius="10" Background="AliceBlue"  BorderThickness="3" BorderBrush="DarkGray" >
+                            <StackPanel Margin="10">
+                                <TextBlock TextAlignment="Left" FontSize="12" Margin="4,0,0,6">
+                                <Bold>Reset</Bold>
+                                <LineBreak/><LineBreak/>Button 'Reset' resets the 'Changed File Names' to equal
+                                <LineBreak/>the 'Present File Names'.  Think of it like an undo, but
+                                <LineBreak/>keep in mind it does not undo committed renames.
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+                    </Button.ToolTip>
+                </Button>
+                <ToggleButton x:Name="Tog_CampOut" 
+                              Grid.Column="8"
+                              Content="Q"
+                              FontFamily="Webdings"
+                              FontSize="24"
+                              IsChecked="{Binding CampOut, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                              HorizontalAlignment="Center"
+                              HorizontalContentAlignment="Center" 
+                              VerticalContentAlignment="Center"
+                              Foreground="#FF1D8B04" 
+                              Focusable="False"
+                              ClickMode="Press"
+                              ToolTipService.IsEnabled="{Binding IsChecked,ElementName=Tog_ToolTips}"
+                              ToolTipService.ShowDuration="10000"  ToolTipService.VerticalOffset="-140">
+                    <ToggleButton.ToolTip  >
+                        <Border CornerRadius="10" Background="AliceBlue"  BorderThickness="3" BorderBrush="DarkGray" >
+                            <StackPanel Margin="10">
+                                <TextBlock TextAlignment="Left" FontSize="12" Margin="4,0,0,6">
+                                <Bold>CampOut</Bold>
+                                <LineBreak/><LineBreak/>The toggle 'CampOut' keeps the renamer open after the new
+                                <LineBreak/>filenames are committed to disk to allow subsequent name changes.
+                                <LineBreak/>Camping Out allows you to perform incremental name changes.
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+                    </ToggleButton.ToolTip>
+                </ToggleButton>
+                <Button x:Name="But_rename"
+                            Grid.Column="9"
+                            Grid.ColumnSpan="2"
+                            Content="Rename"
+                            Margin="6,0" 
+                            Padding="6,1" 
+                            Click="But_rename_Click"
+                            IsEnabled="False"
+                            HorizontalContentAlignment="Center" />
+                <Button x:Name="But_done"
+                            Grid.Column="11"
+                            FontFamily="Webdings"
+                            Content="r" 
+                            IsCancel="True" 
+                            Padding="6,1" Margin="0,0,6,0"
+                            Width="28" HorizontalAlignment="Right"
+                            ToolTipService.IsEnabled="{Binding IsChecked,ElementName=Tog_ToolTips}"
+                            ToolTipService.ShowDuration="500">
+                    <Button.Background>
+                        <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                            <GradientStop Color="#FF5D0000"/>
+                            <GradientStop Color="Red" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Button.Background>
+                    <Button.ToolTip  >
+                        <Border CornerRadius="10" Background="AliceBlue"  BorderThickness="3" BorderBrush="DarkGray" >
+                            <StackPanel Margin="10">
+                                <TextBlock TextAlignment="Left" FontSize="12" Margin="4,0">
+                                    Hit The Trail
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+                    </Button.ToolTip>
+                </Button>
+            </Grid>
+
+            <StackPanel Orientation="Vertical" Margin="6,0">
+                <Expander Header="Automatics">
+                    <StackPanel Orientation="Horizontal">
+                        <ToggleButton x:Name="Tog_ToolTips"
+                                      IsChecked="False" 
+                                      Content="?"
+                                      ToolTipService.IsEnabled="True" ToolTipService.HorizontalOffset="-220" ToolTipService.VerticalOffset="-20"
+                                      ToolTipService.ShowDuration="1500" ToolTipService.InitialShowDelay="100" ToolTipService.BetweenShowDelay="100"
+                                      VerticalAlignment="Center" Margin="0,12,10,0" Focusable="False" Padding="6,1">
+                            <ToggleButton.Background>
+                                <LinearGradientBrush EndPoint="0,1" StartPoint="0,0">
+                                    <GradientStop Color="#FFF3F3F3" Offset="0"/>
+                                    <GradientStop Color="#FFEBEBEB" Offset="0.5"/>
+                                    <GradientStop Color="#FFDDDDDD" Offset="0.5"/>
+                                    <GradientStop Color="Yellow" Offset="1"/>
+                                </LinearGradientBrush>
+                            </ToggleButton.Background>
+                            <ToggleButton.ToolTip  >
+                                <Border CornerRadius="10" Background="AliceBlue"  BorderThickness="3" BorderBrush="DarkGray" >
+                                    <StackPanel Margin="10">
+                                        <TextBlock TextAlignment="Left" FontSize="12" Margin="4,0">
+                                            Toggle the Tooltips On/Off.
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Border>
+                            </ToggleButton.ToolTip>
+                        </ToggleButton>
+                        <GroupBox Header="Replace" 
+                                  ToolTipService.IsEnabled="{Binding IsChecked,ElementName=Tog_ToolTips}"
+                                  ToolTipService.ShowDuration="10000"  ToolTipService.VerticalOffset="-220">
+                            <StackPanel Orientation="Horizontal">
+
+                                <TextBox x:Name="tb_replacethis"
+                                 Text="{Binding ReplaceThis, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 Width="80"
+                                 VerticalAlignment="Center" VerticalContentAlignment="Center" 
+                                 HorizontalContentAlignment="Center" 
+                                 TextChanged="ProcessTheAutomatics" PreviewTextInput="SwallowIllegalCharacters" />
+                                <Label Content="With" 
+                                 HorizontalContentAlignment="Center" HorizontalAlignment="Right"/>
+                                <TextBox x:Name="tb_withthis"
+                                 Text="{Binding WithThis, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 Width="80" VerticalAlignment="Center" VerticalContentAlignment="Center" 
+                                 HorizontalContentAlignment="Center"
+                                 TextChanged="ProcessTheAutomatics" PreviewTextInput="SwallowIllegalCharacters"/>
+                                <Button x:Name="But_ZapReplace"
+                                        VerticalAlignment="Center" Margin="10,0,0,0" 
+                                        Padding="6,1" Click="But_ZapReplace_Click"
+                                        ToolTipService.IsEnabled="{Binding IsChecked,ElementName=Tog_ToolTips}"
+                                        ToolTipService.ShowDuration="2000"
+                                        ToolTipService.VerticalOffset="-80" ToolTipService.HorizontalOffset="-100">
+                                    <ContentControl>
+                                        <Image Source = "{StaticResource UndoImage}" Height="16"/>
+                                    </ContentControl>
+                                    <Button.ToolTip  >
+                                        <Border CornerRadius="10" Background="AliceBlue"  BorderThickness="3" BorderBrush="DarkGray" >
+                                            <StackPanel Margin="10">
+                                                <TextBlock TextAlignment="Left" FontSize="12" Margin="4,0">
+                                                    Clears the search and replace fields.
+                                                </TextBlock>
+                                            </StackPanel>
+                                        </Border>
+                                    </Button.ToolTip>
+                                </Button>
+                            </StackPanel>
+                            <GroupBox.ToolTip  >
+                                <Border CornerRadius="10" Background="AliceBlue"  BorderThickness="3" BorderBrush="DarkGray" >
+                                    <StackPanel Margin="10">
+                                        <TextBlock TextAlignment="Left" FontSize="12" Margin="4,0,0,6">
+                                                <Bold>Replace</Bold>
+                                                <LineBreak/><LineBreak/>'Replace' operates on all the 'Present' file names.
+                                                <LineBreak/>Therefore be sure to first set any desired replacements
+                                                <LineBreak/><Italic>before</Italic> you apply any individual file names. Subsequent
+                                                <LineBreak/>'Replaces' will undo <Italic>ALL</Italic> the individual changes because
+                                                <LineBreak/>the 'Present' names are used for the replacement basis.
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Border>
+                            </GroupBox.ToolTip>
+                        </GroupBox>
+                        <GroupBox Header="Add" 
+                                  ToolTipService.IsEnabled="{Binding IsChecked,ElementName=Tog_ToolTips}"
+                                  ToolTipService.ShowDuration="10000"  ToolTipService.VerticalOffset="-220">
+                            <StackPanel Orientation="Horizontal" >
+                                <TextBox x:Name="tb_addthis"
+                                 Text="{Binding AddThis, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 Width="80"
+                                 VerticalAlignment="Center" VerticalContentAlignment="Center" 
+                                 HorizontalContentAlignment="Center" 
+                                 TextChanged="ProcessTheAutomatics" PreviewTextInput="SwallowIllegalCharacters"/>
+                                <RadioButton x:Name="rb_tofront" 
+                                             HorizontalContentAlignment="Center" 
+                                             VerticalContentAlignment="Center" VerticalAlignment="Center" 
+                                             IsChecked="True" Margin="4,4,4,0" 
+                                             Click="AutomaticsRadioButtonClick">
+                                    <ContentControl>
+                                        <Image Source = "{StaticResource AddToFront}" Height="18"/>
+                                    </ContentControl>
+                                </RadioButton>
+                                <RadioButton x:Name="rb_toback" 
+                                             HorizontalContentAlignment="Center" 
+                                             VerticalContentAlignment="Center" VerticalAlignment="Center"
+                                             Margin="4,4,4,0" 
+                                             Click="AutomaticsRadioButtonClick">
+                                    <ContentControl>
+                                        <Image Source = "{StaticResource AddToBack}" Height="18"/>
+                                    </ContentControl>
+                                </RadioButton>
+                                <Button x:Name="But_ZapAdd"
+                                        VerticalAlignment="Center" Margin="10,0,0,0" 
+                                        Padding="6,1" Click="But_RemoveLastAdd_Click"
+                                        ToolTipService.IsEnabled="{Binding IsChecked,ElementName=Tog_ToolTips}"
+                                        ToolTipService.ShowDuration="2000"
+                                        ToolTipService.VerticalOffset="-80" ToolTipService.HorizontalOffset="-100">
+                                    <ContentControl>
+                                        <Image Source = "{StaticResource UndoImage}" Height="16" />
+                                    </ContentControl>
+                                    <Button.ToolTip  >
+                                        <Border CornerRadius="10" Background="AliceBlue"  BorderThickness="3" BorderBrush="DarkGray" >
+                                            <StackPanel Margin="10">
+                                                <TextBlock TextAlignment="Left" FontSize="12" Margin="4,0">Clears the add field.</TextBlock>
+                                            </StackPanel>
+                                        </Border>
+                                    </Button.ToolTip>
+                                </Button>
+                            </StackPanel>
+                            <GroupBox.ToolTip  >
+                                <Border CornerRadius="10" Background="AliceBlue"  BorderThickness="3" BorderBrush="DarkGray" >
+                                    <StackPanel Margin="10">
+                                        <TextBlock TextAlignment="Left" FontSize="12" Margin="4,0,0,6">
+                                                <Bold>Add</Bold>
+                                                <LineBreak/><LineBreak/>'Add' operates on the filename cores independently from the
+                                                <LineBreak/>'Present' file names. It adds text to the core headend or the tailend.
+                                                <LineBreak/>You can apply or remove the 'Add' at any time without losing
+                                                <LineBreak/>other name changes.
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Border>
+                            </GroupBox.ToolTip>
+                        </GroupBox>
+                    </StackPanel>
+                </Expander>
+            </StackPanel>
+
+            <DataGrid x:Name="dg_names"
+                      AutoGenerateColumns="False"
+                      ItemsSource="{Binding TheFiles, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                      Margin="6"
+                      CanUserAddRows="False"
+                      CanUserDeleteRows="True"
+                      ColumnWidth="*"
+                      VerticalContentAlignment="Center" 
+                      AlternationCount="2" 
+                      AreRowDetailsFrozen="True" 
+                      AlternatingRowBackground="{DynamicResource {x:Static SystemColors.InactiveCaptionBrushKey}}" 
+                      RowHeaderWidth="0" 
+                      CellEditEnding="Dg_names_CellEditEnding" >
+                <DataGrid.Resources>
+                    <Style TargetType="DataGridColumnHeader">
+                        <EventSetter Event="Click" Handler="ColumnHeader_Click" />
+                    </Style>
+                </DataGrid.Resources>
+
+                <DataGrid.ColumnHeaderStyle  >
+                    <Style TargetType="DataGridColumnHeader">
+                        <EventSetter Event="Click" Handler="ColumnHeader_Click"/>
+                    </Style>
+                </DataGrid.ColumnHeaderStyle>
+                <DataGrid.Columns >
+                    <DataGridTextColumn x:Name="dgcol_PresentName" 
+                                        Binding="{Binding Present_Name}" 
+                                        IsReadOnly="True" 
+                                        Header="Present File Name" />
+                    <DataGridTextColumn x:Name="dgcol_ChangedName" 
+                                        Binding="{Binding Changed_Name}" 
+                                        Header="Changed File Name">
+                        <DataGridTextColumn.HeaderStyle >
+                            <Style TargetType="DataGridColumnHeader">
+                                <Setter Property="ToolTipService.ShowDuration"
+                                        Value="20000"/>
+                                <Setter Property="ToolTipService.HorizontalOffset"
+                                        Value="220"/>
+                                <Setter Property="ToolTipService.IsEnabled"
+                                        Value="{Binding IsChecked,ElementName=Tog_ToolTips}"/>
+                                <Setter Property="ToolTip">
+                                    <Setter.Value >
+                                        <Border CornerRadius="10" Background="AliceBlue"  BorderThickness="3" BorderBrush="DarkGray" >
+                                            <StackPanel Margin="10">
+                                                <TextBlock TextAlignment="Left" FontSize="12" Margin="4,0,0,6">
+                                                <Bold>Changed File Name</Bold>. . . . You can click on a single name to edit it.
+                                                <LineBreak/><LineBreak/>'Changed File Name' is the name the file will be changed to be when pressing
+                                                <LineBreak/>the Rename button. New names are validated after the Enter key is pressed or
+                                                <LineBreak/>when the focus moves out of the grid cell. Valid names are green. You don't
+                                                <LineBreak/>need to wait until seeing green before pressing the Rename button. Invalid names
+                                                <LineBreak/>show as red. Red names will ride through whatever IO error they cause. In those
+                                                <LineBreak/>cases the file is of course not renamed. Once renamed there is no undo other than
+                                                <LineBreak/>renaming the files back to what you remember they were.
+                                                </TextBlock>
+                                            </StackPanel>
+                                        </Border>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </DataGridTextColumn.HeaderStyle>
+                    </DataGridTextColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+            <Label x:Name="LB_path"  Margin="6,0"/>
+            <TextBlock x:Name="TBLK_msg" TextWrapping="Wrap"  Margin="6,0" Visibility="Collapsed"/>
+        </StackPanel>
+    </Border>
+</Window>
