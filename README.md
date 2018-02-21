@@ -1,5 +1,4 @@
-![](WpfRadScript/Site.ico)
-# WpfRadScript  
+# WpfRadScript&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  ![](WpfRadScript/Site.ico)
 A WPF front end for various common workflow tasks associated with using the **Radiance Synthetic Imaging System** ([http://radsite.lbl.gov/radiance/][a4d8a80e]) ([https://www.radiance-online.org/][d13f1279]). The **Radiance** system is what is used to make accurate lighting level predictions.
 
   [a4d8a80e]: http://radsite.lbl.gov/radiance/ "http://radsite.lbl.gov/radiance/"

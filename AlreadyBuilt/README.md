@@ -1,5 +1,4 @@
-![](../WpfRadScript/Site.ico)
-# AlreadyBuilt
+# AlreadyBuilt&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ![](../WpfRadScript/Site.ico)
 
 File             | Purpose
 -----------------|--------------------------
