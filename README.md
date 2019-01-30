@@ -5,6 +5,8 @@ A WPF front end for various common workflow tasks associated with using the **Ra
   [d13f1279]: https://www.radiance-online.org/ "https://www.radiance-online.org/"
 
   This is a complex application for a very complex suite of **Radiance** utilities. No attempt here is made to explain this WpfRadScript program. Those familiar with running a **Radiance** system at a nuts and bolts level would recognize what is going on and they might find WpfRadScript useful for what is does.
+  
+  WpfRadScript was created for the lighting designer Mark de la Fuente. The images shown in this documentation are from one of his projects.
 
   ### Requirements
   - Radiance installed ([http://radsite.lbl.gov/radiance/][a4d8a80e]) and WpfRadScript told where to find the **Radiance** binaries.
